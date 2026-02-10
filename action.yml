@@ -12,7 +12,7 @@ runs:
         python-version: '3.9'
     - run: pip install instaloader
       shell: bash
-    - run: python ${{ github.action_path }}/update_insta.py
+    - run: python ${{ github.action_path }}/update_roblox.py
       shell: bash
       env:
         INSTA_USERNAME: ${{ inputs.insta_username }}
