@@ -1,8 +1,8 @@
-name: 'Roblox-README-Puller-Pro'
-description: 'Auto-update your README using the roblox.py library'
+name: 'Insta-README-Puller'
+description: 'Auto-update your README with your latest Instagram post'
 inputs:
-  roblox_user_id:
-    description: 'Roblox User ID'
+  insta_username:
+    description: 'Instagram handle'
     required: true
 runs:
   using: 'composite'
@@ -10,9 +10,9 @@ runs:
     - uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    - run: pip install robloxpy requests
+    - run: pip install instaloader
       shell: bash
-    - run: python ${{ github.action_path }}/update_roblox.py
+    - run: python ${{ github.action_path }}/update_insta.py
       shell: bash
       env:
-        ROBLOX_USER_ID: ${{ inputs.roblox_user_id }}
+        INSTA_USERNAME: ${{ inputs.insta_username }}
