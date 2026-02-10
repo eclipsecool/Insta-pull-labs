@@ -1,49 +1,56 @@
-import os, re, robloxpy
+import os
+import instaloader
+import re
+import random
+import time
 
 def main():
-    user_id = os.getenv("ROBLOX_USER_ID")
-    if not user_id: return
+    # Fetch the target username from environment variables
+    user = os.getenv("INSTA_USERNAME")
+    if not user:
+        print("Error: INSTA_USERNAME environment variable not set.")
+        return
 
+    # Jitter to look less like a bot
+    time.sleep(random.randint(5, 45)) 
+
+    status_message = ""
     try:
-        # 1. Fetch Data using robloxpy (The library you just installed)
-        image_url = robloxpy.User.External.GetAvatar(user_id)
-        user_info = robloxpy.User.Internal.GetPlayerInfo(user_id)
-        display_name = user_info.get('displayName', 'User')
+        loader = instaloader.Instaloader()
+        profile = instaloader.Profile.from_username(loader.context, user)
         
-        # Get Presence (This returns 'Online', 'Offline', or 'In Game: [Game Name]')
-        presence = robloxpy.User.Internal.Presence(user_id)
-
-        # 2. Build a Proper Markdown Table
-        # NOTE: Blank lines \n are REQUIRED before and after for rendering.
-        table = (
-            "\n"
-            "| Profile | Current Status |\n"
-            "| :---: | :--- |\n"
-            f"| <img src='{image_url}' width='60' /> <br> **{display_name}** | {presence} |\n"
-            "\n"
-        )
+        # Fetch the most recent post
+        post = next(profile.get_posts())
+        
+        # Create the clickable Markdown image
+        status_message = f'[![Latest Post]({post.url})](https://www.instagram.com/p/{post.shortcode}/)'
         
     except Exception as e:
-        print(f"Error: {e}")
-        table = "\n⚠️ *Roblox Engine Timeout - Retrying soon.*\n"
+        print(f"Error encountered: {e}")
+        status_message = "⚠️ *Instagram Engine currently in timeout/cool-down. Will retry automatically.*"
 
-    # 3. Inject into README
     if os.path.exists("README.md"):
-        with open("README.md", "r", encoding="utf-8") as f:
+        with open("README.md", "r", encoding="utf-8") as f: 
             content = f.read()
         
-        # Use your custom tags
-        pattern = r"<roblox start>.*?<roblox stop>"
-        replacement = f"<roblox start>\n{table}\n<roblox stop>"
+        # Using your custom tags
+        pattern = r"<insta:start>.*?<insta:stop>"
+        replacement = f"<insta:start>\n{status_message}\n<insta:stop>"
         
-        if "<roblox start>" in content:
+        if "<insta:start>" in content:
             new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
-            with open("README.md", "w", encoding="utf-8") as f:
+            
+            with open("README.md", "w", encoding="utf-8") as f: 
                 f.write(new_content)
 
-            # 4. Commit as "rblx updater"
-            os.system('git config --global user.name "rblx updater"')
+            # Git Automation
+            os.system('git config --global user.name "insta-bot"')
             os.system('git config --global user.email "actions@github.com"')
             os.system('git add README.md')
-            os.system('git commit -m "Fixed Table with robloxpy" || exit 0')
+            os.system('git commit -m "Update Insta Status" || exit 0')
             os.system('git push')
+        else:
+            print("Required tags <insta:start> and <insta:stop> not found in README.md")
+
+if __name__ == "__main__":
+    main()
