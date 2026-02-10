@@ -10,7 +10,7 @@ runs:
     - uses: actions/setup-python@v4
       with:
         python-version: '3.9'
-    - run: pip install robloxpy
+    - run: pip install robloxpy requests
       shell: bash
     - run: python ${{ github.action_path }}/update_roblox.py
       shell: bash
